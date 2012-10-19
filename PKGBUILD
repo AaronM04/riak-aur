@@ -1,5 +1,7 @@
-# Maintainer: Albert Chang <albert.chang@gmx.com>
+# Maintainer: lafka <lafa@hackeriet.no>
+# Contributor: Albert Chang <albert.chang@gmx.com>
 # Contributor: Thomas Mudrunka <harvie@@email..cz> You can also contact me on http://blog.harvie.cz/
+# Contributor: zhehao
 
 pkgname=riak
 pkgver_maj=1.2
@@ -24,16 +26,9 @@ md5sums=('0d7ccaa18d2e5805230c0d9486683253'
          'af9a1757a5011d23712555adc98c133f'
          'f48643d5186dbbd1c2cd65f7bde2511c'
          'ed4cda47fc1fad8b0a3fb3858600c578')
-                  
-fixerldep() {
-  find . -type f -name 'rebar.config' | xargs sed -i -e 's/R13B04|R14/R13B04|R14|R15/;' -e 's/R14B0\[234\]/R14B0[234]|R15/'
-}
 
 build() {
   cd ${srcdir}/riak-${pkgver}
-
-  # Fix R15 dependencies
-  fixerldep
 
   msg 'Cleaning...'
   make distclean
@@ -41,13 +36,12 @@ build() {
   msg 'Building...'
   # need to unset LDFLAGS because: ld: unrecognized option '-Wl,--hash-style=gnu'
   unset LDFLAGS
-  make rel || (fixerldep; make rel)
+  make rel 
 }
 
 package() {
-
   install -d ${pkgdir}/opt/riak
-  
+
   cd ${srcdir}/riak-${pkgver}/rel/riak
 
   cp -r ./* ${pkgdir}/opt/riak
@@ -57,7 +51,7 @@ package() {
     pacman -Ql erlang | cut -d ' ' -f 2- | while read i; do
       [ -d "$i" ] || {
         rm -f ${pkgdir}/"$i";
-        echo -ne "$i                             \r";
+        echo -ne "$i\r";
       }
     done; echo;
   }
